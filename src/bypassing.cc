@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <array>
 
 #define NUM_CORE NUM_CPUS
 #define MAX_LLC_SETS LLC_SET
@@ -22,8 +23,11 @@
 #define ALPHA 0.05
 #define GAMMA 0.2
 #define DISCOUNT 0.9999
+
+float sum_reward = 0;
 uint32_t counter = 0;
 float epsilon = EPSILON;
+using namespace std;
 
 class State
 {
@@ -374,6 +378,13 @@ void train(Naper_EQEntry *curr_evicted, Naper_EQEntry *last_evicted)
   Qsa1 = q_table[state1_core][state1_pc][state1_offset][action1];
   Qsa2 = q_table[state2_core][state2_pc][state2_offset][action2];
   /* SARSA */
+  sum_reward += reward;
+  ofstream myfile;
+  myfile.open ("reward.txt", ios::app);
+  myfile << sum_reward;
+  //myfile << reward;
+  myfile << " ";
+  myfile.close();
   Qsa1 = Qsa1 + ALPHA * ((float)reward + GAMMA * Qsa2 - Qsa1);
   q_table[state1_core][state1_pc][state1_offset][action1] = Qsa1;
   if (epsilon > 0.1) {
@@ -381,4 +392,3 @@ void train(Naper_EQEntry *curr_evicted, Naper_EQEntry *last_evicted)
     }
   return;
 }
-
